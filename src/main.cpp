@@ -37,7 +37,7 @@ struct bullet
     {
         SDL_Rect ret;
         ret.x = x - 1;
-        ret.y = y - 4;
+        ret.y = (int)y - 4;
         ret.w = 2;
         ret.h = 8;
         return ret;
@@ -55,8 +55,8 @@ struct baddy
     SDL_Rect r() const
     {
         SDL_Rect ret;
-        ret.x = x - baddy_w / 2;
-        ret.y = y - baddy_h / 2;
+        ret.x = (int)x - baddy_w / 2;
+        ret.y = (int)y - baddy_h / 2;
         ret.w = baddy_w;
         ret.h = baddy_h;
         return ret;
@@ -70,7 +70,7 @@ float baddy_speed = 20.0f;
 SDL_Rect pr()
 {
     SDL_Rect ret;
-    ret.x = player_x - player_w / 2;
+    ret.x = (int)player_x - player_w / 2;
     ret.y = player_y - player_h / 2;
     ret.w = player_w;
     ret.h = player_h;
@@ -113,8 +113,8 @@ void reset_game()
         for (int x = 0; x < n_baddies_x; x++)
         {
             baddy b;
-            b.x = x_start + x * baddy_w * 2;
-            b.y = y_start + y * baddy_h * 2;
+            b.x = (float)(x_start + x * baddy_w * 2);
+            b.y = (float)(y_start + y * baddy_h * 2);
             b.last_fire_time = lticks;
             baddies.push_front(b);
         }
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
         {
             // spawn new bullet
             bullet b;
-            b.x = player_x;
+            b.x = (int)player_x;
             b.y = player_y;
             b.speed = -200.0;
             b.is_player = true;
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
                 {
                     // fire
                     bullet blt;
-                    blt.x = b.x;
+                    blt.x = (int)b.x;
                     blt.y = b.y;
                     blt.speed = 200.0f;
                     blt.is_player = false;
@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_Rect r;
-        r.x = player_x - player_w / 2;
+        r.x = (int)player_x - player_w / 2;
         r.y = player_y - player_h / 2;
         r.w = player_w;
         r.h = player_h;
