@@ -4,9 +4,10 @@
 
 float player_x = 320.0f;
 const float player_speed = 80.0f;   // per second
+const float baddy_fire_interval = 4000.0f;
 const int player_y = 440;
-const int player_w = 64;
-const int player_h = 32;
+const int player_w = 24;
+const int player_h = 12;
 const int baddy_w = 24;
 const int baddy_h = 24;
 const int n_baddies_x = 10;
@@ -22,6 +23,7 @@ bool game_is_still_running = true;
 bool keypress[256] = { false };
 
 Uint64 last_fire_time = 0;
+Uint64 last_baddy_fire_check = 0;
 const Uint64 fire_delay = 500;
 
 struct bullet
@@ -95,6 +97,9 @@ void reset_game()
     // Add baddies
     lticks = SDL_GetTicks64();
 
+    last_baddy_fire_check = 0;
+    last_fire_time = 0;
+
     baddy_move_left = true;
 
     baddies.clear();
@@ -147,6 +152,15 @@ int main(int argc, char *argv[])
         auto cticks = SDL_GetTicks64();
         auto ticks = cticks - lticks;
         lticks = cticks;
+
+        bool baddy_fire_check = false;
+        Uint64 bfire_ticks = 0;
+        if (cticks > (last_baddy_fire_check + 100))
+        {
+            bfire_ticks = cticks - last_baddy_fire_check;
+            last_baddy_fire_check = cticks;
+            baddy_fire_check = true;
+        }
 
         // Event handling
         bool fire_pressed = false;
@@ -241,6 +255,11 @@ int main(int argc, char *argv[])
             advance = true;
         }
 
+        // proportion of baddies killed, used to increase firing rate
+        float prop_baddies_killed = (float)(n_baddies_x * n_baddies_y - baddies.size()) /
+            (float)baddies.size();
+        float baddie_fire_chance = std::max(prop_baddies_killed, 0.05f);
+
         for (auto& b : baddies)
         {
             if (baddy_move_left)
@@ -271,6 +290,27 @@ int main(int argc, char *argv[])
             {
                 // don't destroy baddy on shield hit, just the baddie itself
                 shields[i].hit(br);
+            }
+
+            // Fire bullet?
+            if (baddy_fire_check && cticks >= (b.last_fire_time + fire_delay))
+            {
+                // has potential to fire
+                float fire_chance = (float)bfire_ticks / baddy_fire_interval * baddie_fire_chance;
+                
+                int fc_int = (int)(fire_chance * (float)RAND_MAX);
+                if (fc_int == 0) fc_int = 1;
+                if (rand() < fc_int)
+                {
+                    // fire
+                    bullet blt;
+                    blt.x = b.x;
+                    blt.y = b.y;
+                    blt.speed = 200.0f;
+                    blt.is_player = false;
+                    bullets.push_back(blt);
+                    b.last_fire_time = cticks;
+                }
             }
 
             // Display baddy
@@ -309,7 +349,7 @@ int main(int argc, char *argv[])
                         {
                             for_bullet_destroy = true;
                             baddies.erase(biter);
-                            baddy_speed += 1.0f;
+                            baddy_speed += 2.0f;
 
                             if (baddies.empty())
                             {
