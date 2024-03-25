@@ -1,0 +1,5 @@
+{
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/../gk-userland/toolchain-m4.cmake"
+    },
+}
