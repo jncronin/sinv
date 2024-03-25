@@ -156,10 +156,14 @@ int main(int argc, char *argv[])
         if (keypress[SDL_SCANCODE_LEFT])
         {
             player_x -= (float)ticks * player_speed / 1000.0f;
+            if (player_x < player_w / 2 + 5)
+                player_x = player_w / 2 + 5;
         }
         if (keypress[SDL_SCANCODE_RIGHT])
         {
             player_x += (float)ticks * player_speed / 1000.0f;
+            if (player_x >= 635 - player_w / 2)
+                player_x = 635 - player_w / 2;
         }
         auto prect = pr();
 
