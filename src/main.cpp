@@ -12,6 +12,10 @@ const int baddy_h = 24;
 const int n_baddies_x = 10;
 const int n_baddies_y = 5;
 const int baddy_advance = 12;
+const int shield_w = 8;
+const int shield_h = 8;
+const int shield_scale = 8;
+const int n_shields = 4;
 
 bool game_is_still_running = true;
 
@@ -74,6 +78,18 @@ SDL_Rect pr()
 Uint64 lticks;
 bool baddy_move_left;
 
+struct shield
+{
+    bool parts[shield_w * shield_h];
+    int x, y;
+
+    bool hit(const SDL_Rect& other);
+    void draw(SDL_Renderer* r);
+    void reset();
+};
+
+shield shields[n_shields];
+
 void reset_game()
 {
     // Add baddies
@@ -97,6 +113,13 @@ void reset_game()
             b.last_fire_time = lticks;
             baddies.push_front(b);
         }
+    }
+
+    for (int i = 0; i < n_shields; i++)
+    {
+        shields[i].x = 64 + (640 - 64*2) / (n_shields - 1) * i;
+        shields[i].y = player_y - 64;
+        shields[i].reset();
     }
 
     player_x = 320;
@@ -234,14 +257,20 @@ int main(int argc, char *argv[])
                 b.y += baddy_advance;
             }
 
+            auto br = b.r();
             if (maybe_baddie_hit_player)
             {
-                auto br = b.r();
                 if (SDL_HasIntersection(&prect, &br))
                 {
                     reset_game();
                     break;
                 }
+            }
+
+            for (int i = 0; i < n_shields; i++)
+            {
+                // don't destroy baddy on shield hit, just the baddie itself
+                shields[i].hit(br);
             }
 
             // Display baddy
@@ -292,6 +321,18 @@ int main(int argc, char *argv[])
                     }
                 }
 
+                if (!for_bullet_destroy)
+                {
+                    for (int i = 0; i < n_shields; i++)
+                    {
+                        if (shields[i].hit(br))
+                        {
+                            for_bullet_destroy = true;
+                            break;
+                        }
+                    }
+                }
+
                 if (for_next_level)
                 {
                     reset_game();
@@ -312,6 +353,12 @@ int main(int argc, char *argv[])
             }
         }
 
+        // Display shields
+        for (int i = 0; i < n_shields; i++)
+        {
+            shields[i].draw(renderer);
+        }
+
 
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_Rect r;
@@ -329,4 +376,79 @@ int main(int argc, char *argv[])
     SDL_Quit();
 
     return 0;
+}
+
+void shield::reset()
+{
+    int nparts[] = {
+        0,0,0,1,1,0,0,0,
+        0,1,1,1,1,1,1,0,
+        1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,
+        1,1,1,0,0,1,1,1,
+        1,1,0,0,0,0,1,1,
+        1,1,0,0,0,0,1,1
+    };
+
+    for (int i = 0; i < sizeof(nparts) / sizeof(int); i++)
+        parts[i] = nparts[i] != 0;
+}
+
+void shield::draw(SDL_Renderer* r)
+{
+    SDL_SetRenderDrawColor(r, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    int s_x = x - (shield_w * shield_scale) / 2;
+    int s_y = y - (shield_h * shield_scale) / 2;
+    for (int y = 0; y < shield_h; y++)
+    {
+        for (int x = 0; x < shield_w; x++)
+        {
+            if (parts[x + y * shield_w])
+            {
+                SDL_Rect rct;
+                rct.x = s_x + x * shield_scale;
+                rct.y = s_y + y * shield_scale;
+                rct.w = shield_scale;
+                rct.h = shield_scale;
+                SDL_RenderFillRect(r, &rct);
+            }
+        }
+    }
+}
+
+bool shield::hit(const SDL_Rect& other)
+{
+    SDL_Rect mr;
+    mr.x = x - (shield_w * shield_scale) / 2;
+    mr.y = y - (shield_h * shield_scale) / 2;
+    mr.w = shield_w * shield_scale;
+    mr.h = shield_h * shield_scale;
+
+    // First just check for gross hit
+    SDL_Rect isect;
+    if (!SDL_IntersectRect(&other, &mr, &isect))
+        return false;
+
+    /* Then get all overlapping squares */
+    isect.x -= std::max(mr.x, 0);
+    isect.y -= std::max(mr.y, 0);
+    isect.x /= shield_scale;
+    isect.y /= shield_scale;
+    isect.w /= shield_scale;
+    isect.h /= shield_scale;
+
+    bool ret = false;
+    for (int cy = isect.y; (cy < shield_h) && (cy <= isect.y + isect.h); cy++)
+    {
+        for (int cx = isect.x; (cx < shield_w) && (cx <= isect.x + isect.w); cx++)
+        {
+            if (parts[cx + cy * shield_w])
+            {
+                ret = true;
+                parts[cx + cy * shield_w] = false;
+            }
+        }
+    }
+    return ret;
 }
