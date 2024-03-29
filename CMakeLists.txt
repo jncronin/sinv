@@ -22,3 +22,5 @@ target_link_libraries(sinv
         SDL2::SDL2main
         SDL2::SDL2
 )
+
+gk_generate_package(sinv)
