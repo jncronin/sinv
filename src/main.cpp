@@ -153,6 +153,8 @@ int main(int argc, char *argv[])
         auto ticks = cticks - lticks;
         lticks = cticks;
 
+        printf("sinv: ticks: %u, fps: %.2f\n", (unsigned int)ticks, 1000.0f / (float)ticks);
+
         bool baddy_fire_check = false;
         Uint64 bfire_ticks = 0;
         if (cticks > (last_baddy_fire_check + 100))
