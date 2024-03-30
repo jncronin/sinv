@@ -410,6 +410,7 @@ int main(int argc, char *argv[])
         r.h = player_h;
         SDL_RenderFillRect(renderer, &r);
 
+        printf("sinv: call SDL_RenderPresent\n");
         SDL_RenderPresent(renderer);
     }
 
