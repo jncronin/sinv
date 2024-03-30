@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         0
     );
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     reset_game();
 
     while (game_is_still_running)
@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
         r.h = player_h;
         SDL_RenderFillRect(renderer, &r);
 
-        printf("sinv: call SDL_RenderPresent\n");
+        //printf("sinv: call SDL_RenderPresent\n");
         SDL_RenderPresent(renderer);
     }
 
