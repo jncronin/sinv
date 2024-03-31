@@ -29,5 +29,9 @@ add_custom_command(TARGET sinv POST_BUILD
 )
 
 if(GAMEKID)
-    gk_generate_package(sinv)
+    gk_generate_package(
+        sinv
+        ${CMAKE_CURRENT_BINARY_DIR}/inv.bmp
+        ${CMAKE_CURRENT_BINARY_DIR}/player.bmp
+    )
 endif()
