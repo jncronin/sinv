@@ -144,6 +144,17 @@ int main(int argc, char *argv[])
         0
     );
 
+#if 0
+    // Try and select video mode
+    SDL_DisplayMode mymode, newmode;
+    SDL_GetCurrentDisplayMode(0, &mymode);
+    mymode.format = SDL_PIXELFORMAT_RGB565;
+    if(SDL_GetClosestDisplayMode(0, &mymode, &newmode))
+    {
+        SDL_SetWindowDisplayMode(window, &newmode);
+    } 
+#endif
+
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     reset_game();
 
