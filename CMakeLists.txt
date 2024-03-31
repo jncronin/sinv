@@ -23,4 +23,6 @@ target_link_libraries(sinv
         SDL2::SDL2
 )
 
-gk_generate_package(sinv)
+if(GAMEKID)
+    gk_generate_package(sinv)
+endif()
