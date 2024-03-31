@@ -23,6 +23,11 @@ target_link_libraries(sinv
         SDL2::SDL2
 )
 
+add_custom_command(TARGET sinv POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assets/inv.bmp ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/assets/player.bmp ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 if(GAMEKID)
     gk_generate_package(sinv)
 endif()

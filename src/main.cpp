@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
         0
     );
 
+
 #if 0
     // Try and select video mode
     SDL_DisplayMode mymode, newmode;
@@ -156,6 +157,20 @@ int main(int argc, char *argv[])
 #endif
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    SDL_Surface *s_inv = SDL_LoadBMP("inv.bmp");
+    if(!s_inv)
+    {
+        printf("SDL_LoadBMP failed\n");
+    }
+    auto s_tex = SDL_CreateTextureFromSurface(renderer, s_inv);
+    if(!s_tex)
+    {
+        printf("SDL_CreateTextureFromSurface failed\n");
+    }
+
+    auto p_tex = SDL_CreateTextureFromSurface(renderer, SDL_LoadBMP("player.bmp"));
+
     reset_game();
 
     while (game_is_still_running)
@@ -329,7 +344,8 @@ int main(int argc, char *argv[])
             // Display baddy
             SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
             SDL_Rect r = b.r();
-            SDL_RenderFillRect(renderer, &r);
+            //SDL_RenderFillRect(renderer, &r);
+            SDL_RenderCopy(renderer, s_tex, NULL, &r);
 
         }
 
@@ -419,7 +435,8 @@ int main(int argc, char *argv[])
         r.y = player_y - player_h / 2;
         r.w = player_w;
         r.h = player_h;
-        SDL_RenderFillRect(renderer, &r);
+        //SDL_RenderFillRect(renderer, &r);
+        SDL_RenderCopy(renderer, p_tex, NULL, &r);
 
         //printf("sinv: call SDL_RenderPresent\n");
         SDL_RenderPresent(renderer);
